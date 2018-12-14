@@ -1,19 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TestBelatrix2
+﻿namespace TestBelatrix2
 {
     using System;
+    using System.Configuration;
+    using System.Data.SqlClient;
+    using System.IO;
     using System.Linq;
     using System.Text;
 
     public class JobLogger
     {
 
-        private static bool _logToFile; private static bool _logToConsole; private static bool _logMessage; private static bool _logWarning; private static bool _logError; private static bool LogToDatabase; private bool _initialized;
+        private static bool _logToFile;
+        private static bool _logToConsole;
+        private static bool _logMessage;
+        private static bool _logWarning;
+        private static bool _logError;
+        private static bool LogToDatabase;
+        private static string _connectionString;
+        private static string _logFileDirectory;
+        private static string _currentDate;
+
         public JobLogger(bool logToFile, bool logToConsole, bool logToDatabase, bool logMessage, bool logWarning, bool logError)
         {
             _logError = logError;
@@ -21,61 +27,82 @@ namespace TestBelatrix2
             _logWarning = logWarning; LogToDatabase = logToDatabase;
             _logToFile = logToFile;
             _logToConsole = logToConsole;
+            _connectionString = ConfigurationManager.AppSettings["ConnectionString"];
+            _logFileDirectory = ConfigurationManager.AppSettings["Log FileDirectory"];
+            _currentDate = DateTime.Now.ToShortDateString();
         }
 
-        public static void LogMessage(string message, bool message, bool warning, bool error)
+        public static void LogMessage(string message, bool warning, bool error)
         {
             message.Trim();
             if (message == null || message.Length == 0)
             {
                 return;
-
             }
             if (!_logToConsole && !_logToFile && !LogToDatabase)
             {
                 throw new Exception("Invalid configuration");
             }
-            if ((!_logError && !_logMessage && !_logWarning) || (!message && !warning && !error))
+            if ((!_logError && !_logMessage && !_logWarning) || (string.IsNullOrEmpty(message) && !warning && !error))
             {
                 throw new Exception("Error or Warning or Message must be specified");
             }
 
-            System.Data.SqlClient.SqlConnection connection = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.AppSettings["ConnectionString"]);
-            connection.Open(); int t;
-            if (message && _logMessage)
+            using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                t = 1;
+                try
+                {
+                    connection.Open();
+
+                    int t = 0;
+
+                    if (string.IsNullOrEmpty(message) && _logMessage)
+                    {
+                        t = 1;
+                    }
+                    if (error && _logError)
+                    {
+                        t = 2;
+                    }
+                    if (warning && _logWarning)
+                    {
+                        t = 3;
+                    }
+                    SqlCommand command = new SqlCommand("Insert into Log Values('" + message + "', " + t.ToString() + ")");
+                    command.ExecuteNonQuery();
+                }
+                catch (SqlException)
+                {
+                    throw;
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Something went wrong in database");
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            string l = "";
+            if (!File.Exists(_logFileDirectory + "LogFile" + _currentDate + ".txt"))
+            {
+                l = File.ReadAllText(_currentDate + "LogFile" + _currentDate + ".txt");
             }
             if (error && _logError)
             {
-                t = 2;
+                l = l +_currentDate + message;
             }
             if (warning && _logWarning)
             {
-                t = 3;
+                l = l + _currentDate + message;
             }
-            System.Data.SqlClient.SqlCommand command = new System.Data.SqlClient.SqlCommand("Insert into Log Values('" + message + "', " + t.ToString() + ")");
-            command.ExecuteNonQuery();
-
-            string l; if
-            (!System.IO.File.Exists(System.Configuration.ConfigurationManager.AppSettings["Log FileDirectory"] + "LogFile" + DateTime.Now.ToShortDateString() + ".txt"))
+            if (!string.IsNullOrEmpty(message) && _logMessage)
             {
-                l = System.IO.File.ReadAllText(System.Configuration.ConfigurationManager.AppSettings[" LogFileDirectory"] + "LogFile" + DateTime.Now.ToShortDateString() + ".txt");
-            }
-            if (error && _logError)
-            {
-                l = l + DateTime.Now.ToShortDateString() + message;
-            }
-            if (warning && _logWarning)
-            {
-                l = l + DateTime.Now.ToShortDateString() + message;
-            }
-            if (message && _logMessage)
-            {
-                l = l + DateTime.Now.ToShortDateString() + message;
+                l = l + _currentDate + message;
             }
 
-            System.IO.File.WriteAllText(System.Configuration.ConfigurationManager.AppSettings["LogFileDirectory"] + "LogFile" + DateTime.Now.ToShortDateString() + ".txt", l);
+            File.WriteAllText(_logFileDirectory + "LogFile" + _currentDate + ".txt", l);
 
             if (error && _logError)
             {
@@ -85,11 +112,11 @@ namespace TestBelatrix2
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
-            if (message && _logMessage)
+            if (!string.IsNullOrEmpty(message) && _logMessage)
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            Console.WriteLine(DateTime.Now.ToShortDateString() + message);
+            Console.WriteLine(_currentDate + message);
         }
     }
 
