@@ -34,8 +34,12 @@
 
         public static void LogMessage(string message, bool warning, bool error)
         {
+            int t = 0;
+            string l = "";
+
             message.Trim();
-            if (message == null || message.Length == 0)
+
+            if (string.IsNullOrEmpty(message))
             {
                 return;
             }
@@ -53,8 +57,6 @@
                 try
                 {
                     connection.Open();
-
-                    int t = 0;
 
                     if (string.IsNullOrEmpty(message) && _logMessage)
                     {
@@ -84,39 +86,40 @@
                     connection.Close();
                 }
             }
-            string l = "";
+            
             if (!File.Exists(_logFileDirectory + "LogFile" + _currentDate + ".txt"))
             {
                 l = File.ReadAllText(_currentDate + "LogFile" + _currentDate + ".txt");
             }
-            if (error && _logError)
+
+            switch (t)
             {
-                l = l +_currentDate + message;
-            }
-            if (warning && _logWarning)
-            {
-                l = l + _currentDate + message;
-            }
-            if (!string.IsNullOrEmpty(message) && _logMessage)
-            {
-                l = l + _currentDate + message;
+                case 1:
+                    l = l + _currentDate + message;
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+                case 2:
+                    l = l + _currentDate + message;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case 3:
+                    l = l + _currentDate + message;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                default:
+                    break;
             }
 
             File.WriteAllText(_logFileDirectory + "LogFile" + _currentDate + ".txt", l);
 
-            if (error && _logError)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-            }
-            if (warning && _logWarning)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            }
-            if (!string.IsNullOrEmpty(message) && _logMessage)
-            {
-                Console.ForegroundColor = ConsoleColor.White;
-            }
             Console.WriteLine(_currentDate + message);
+        }
+
+        public enum MessageType
+        {
+            MESSAGE,
+            WARNING,
+            ERROR
         }
     }
 

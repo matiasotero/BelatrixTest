@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBelatrix", "TestBelatrix2\TestBelatrix.csproj", "{32F8412F-2AE7-4729-8617-A33295AED6A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestDemo", "UnitTestDemo\UnitTestDemo.csproj", "{22D017A4-A956-4A58-84D8-3E55AAE3416F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{32F8412F-2AE7-4729-8617-A33295AED6A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32F8412F-2AE7-4729-8617-A33295AED6A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32F8412F-2AE7-4729-8617-A33295AED6A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22D017A4-A956-4A58-84D8-3E55AAE3416F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22D017A4-A956-4A58-84D8-3E55AAE3416F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22D017A4-A956-4A58-84D8-3E55AAE3416F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22D017A4-A956-4A58-84D8-3E55AAE3416F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
