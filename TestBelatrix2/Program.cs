@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TestBelatrix;
 
 namespace TestBelatrix2
 {
@@ -10,6 +7,12 @@ namespace TestBelatrix2
     {
         static void Main(string[] args)
         {
+            //Run Example
+            var jobLogger = new JobLogger(logToFile: false, logToConsole: true, logToDatabase: false);
+
+            jobLogger.LogMessage("Test", JobLogger.MessageType.WARNING);
+
+            Console.ReadKey();
         }
     }
 }
